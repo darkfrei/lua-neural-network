@@ -1,0 +1,12 @@
+return
+{
+	{type = "input", childs = {4, 5, 6, 7, 8, 9}, id = 1},
+	{type = "input", childs = {4, 5, 6, 7, 8, 9}, id = 2},
+	{type = "input", childs = {4, 5, 6, 7, 8, 9}, id = 3},
+	{bias = -0.205, id = 4, type = "hidden", synapses = {-0.5, 0.5, -0.25}, childs = {5, 6, 7, 8, 9}},
+	{bias = -0.3, id = 5, type = "hidden", synapses = {0.25, -2, -2, 2}, childs = {6, 7, 8, 9}},
+	{bias = -0.405, id = 6, type = "hidden", synapses = {0.5, -1, 2, -0.5, -0.5}, childs = {7, 8, 9}},
+	{bias = -0.245, id = 7, type = "hidden", synapses = {-0.25, 0.5, 0.25, 1, -0.25, -1}, childs = {8, 9}},
+	{bias = -0.915, id = 8, type = "output", synapses = {0.5, -1, 0.25, -1, 1, 0.25, -2}, childs = {9}},
+	{bias = -0.335, id = 9, type = "output", synapses = {1, -2, 1, 0.5, 1, -1, -0.5, 2}, childs = {}}
+}
