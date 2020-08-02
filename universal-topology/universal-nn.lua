@@ -53,9 +53,9 @@ end
 
 function create_unn (input_nodes_amount, hidden_nodes_amount, output_nodes_amount)
 	local unn = {} -- the universal neural network;
-	unn.input_nodes_amount = input_nodes_amount
-	unn.hidden_nodes_amount = hidden_nodes_amount
-	unn.output_nodes_amount = output_nodes_amount
+--	unn.input_nodes_amount = input_nodes_amount
+--	unn.hidden_nodes_amount = hidden_nodes_amount
+--	unn.output_nodes_amount = output_nodes_amount
 	
 	unn.nodes = {} -- nodes
 	unn.input_nodes = {} -- input nodes
@@ -86,14 +86,56 @@ function create_unn (input_nodes_amount, hidden_nodes_amount, output_nodes_amoun
 	return unn
 end
 
-save(create_unn (3, 4, 2).nodes, 'nn.tabl')
+--	test
+local nn = create_unn (3, 4, 2)
+save(nn.nodes, 'nn.tabl')
 
-function feed_forward ()
-	
+
+function activation (value)
+	-- my logarithmic ReLU also NLReLU
+	return math.log(1+math.max(0, value))
+end
+
+
+function deactivation (value)
+	return (value>0) and 1/(value+1) or 0
 end
 
 
 
+
+function feed_forward (unn, input_values)
+	local values = {}
+	local summs = {}
+	local result_values = {}
+	for i, node in pairs (unn.nodes) do
+		if input_values[i] then 
+			values[i] = input_values[i]
+		else
+			local summ = node.bias
+			for parent_id, weight in pairs (node.synapses) do
+				summ = summ + weight*values[parent_id]
+			end
+			summs[i] = summ
+			local value = activation (summ)
+			values[i] = value
+			if node.type == "output" then
+--				table.insert (result_values, summ)
+				table.insert (result_values, value)
+			end
+		end
+	end
+	return result_values, values, summs
+end
+
+local result_values, values, summs = feed_forward (nn, {11, 2, 5})
+
+local str = ''
+for i, v in pairs (result_values) do
+	print (i .. ' ' .. v)
+end
+
+save({result_values=result_values, values=values, summs=summs}, 'result.tabl')
 
 
 
