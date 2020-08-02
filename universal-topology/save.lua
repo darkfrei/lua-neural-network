@@ -42,9 +42,7 @@ function save (tabl, filename)
 	local tab = '	'
 	local str = 'return' .. new_line .. '{'
 	for i, v in pairs (tabl) do
-		if type (v) == "table" then
-			str = str .. new_line .. tab .. deep_to_str (v) .. ','
-		end
+		str = str .. new_line .. tab .. format_index_and_value (i, v) .. ','
 	end
 	
 	str = string.sub(str, 1, -2) -- delete last comma
