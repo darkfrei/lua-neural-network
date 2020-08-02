@@ -1,4 +1,7 @@
+--	(c) darkfrei, 2020-08-02
+--	MIT License
 
+require('save')
 
 --[[
 
@@ -22,7 +25,7 @@ end
 ]]
 
 function set_bias ()
-	return math.random()*2-1
+	return math.random(200)/200-1
 end
 
 function set_weight ()
@@ -49,7 +52,7 @@ function enable_all_synapses (unn)
 end
 
 function create_unn (input_nodes_amount, hidden_nodes_amount, output_nodes_amount)
-	local unn -- the universal neural network;
+	local unn = {} -- the universal neural network;
 	unn.input_nodes_amount = input_nodes_amount
 	unn.hidden_nodes_amount = hidden_nodes_amount
 	unn.output_nodes_amount = output_nodes_amount
@@ -59,23 +62,23 @@ function create_unn (input_nodes_amount, hidden_nodes_amount, output_nodes_amoun
 	local id = 0
 	for n_node = 1, input_nodes_amount do
 		id = id + 1
-		local node = {type = "input", id = id, childs = {}}
-		table.input(unn.nodes, node)
-		table.input(unn.input_nodes, node)
+		local node = {id = id, type = "input", childs = {}}
+		table.insert(unn.nodes, node)
+		table.insert(unn.input_nodes, node)
 	end
 	
 	for n_node = 1, hidden_nodes_amount do
 		id = id + 1
-		local node = {type = "hidden", id = id, synapses = {}, bias = set_bias(), childs = {}}
-		table.input(unn.nodes, node)
-		table.input(unn.input_nodes, node)
+		local node = {id = id, type = "hidden", bias = set_bias(), synapses = {}, childs = {}}
+		table.insert(unn.nodes, node)
+		table.insert(unn.input_nodes, node)
 	end
 		
 	for n_node = 1, output_nodes_amount do
 		id = id + 1
-		local node = {type = "output", id = id, synapses = {}, childs = {}}
-		table.input(unn.nodes, node)
-		table.input(unn.input_nodes, node)
+		local node = {id = id, type = "output", bias = set_bias(), synapses = {}, childs = {}}
+		table.insert(unn.nodes, node)
+		table.insert(unn.input_nodes, node)
 	end
 	
 	enable_all_synapses (unn)
@@ -83,11 +86,11 @@ function create_unn (input_nodes_amount, hidden_nodes_amount, output_nodes_amoun
 	return unn
 end
 
+save(create_unn (3, 4, 2).nodes, 'nn.tabl')
+
 function feed_forward ()
 	
 end
-
-
 
 
 
