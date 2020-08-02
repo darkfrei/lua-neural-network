@@ -13,6 +13,8 @@ function format_index_and_value (i, v)
 		else
 			str = i .. ' = '
 		end
+	else
+		str = '[' .. i .. '] = '
 	end
 	--format value
 	if type (v) == 'number' then
