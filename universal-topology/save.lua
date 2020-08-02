@@ -2,7 +2,7 @@
 --	MIT License
 
 --	use as "save (tabl, filename)"
---save (tabl, 'test.tabl')
+--	save (tabl, 'test.tabl')
 
 function format_index_and_value (i, v)
 	local str = ''
@@ -40,7 +40,9 @@ function save (tabl, filename)
 	local tab = '	'
 	local str = 'return' .. new_line .. '{'
 	for i, v in pairs (tabl) do
-		str = str .. new_line .. tab .. deep_to_str (v) .. ','
+		if type (v) == "table" then
+			str = str .. new_line .. tab .. deep_to_str (v) .. ','
+		end
 	end
 	
 	str = string.sub(str, 1, -2) -- delete last comma
@@ -61,3 +63,74 @@ local tabl =
 }
 
 --save (tabl, 'test.tabl')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
