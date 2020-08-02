@@ -134,5 +134,3 @@ local tabl =
 
 
 
-
-
