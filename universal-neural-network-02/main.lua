@@ -5,8 +5,8 @@ require ('unn')
 function love.load()
 	love.math.setRandomSeed(love.timer.getTime())
 	
---	nn_size = 5 -- 15
-	nn_size = 7
+--	nn_size = 7
+	nn_size = 5 -- enought for XOR
 --	nn_1 = unn:new(15)
 	nn_1 = unn:new(nn_size)
 --	nn_2 = unn:new(12, "nn2")
