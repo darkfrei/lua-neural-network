@@ -110,20 +110,29 @@ function create_nn (input, middle, output)
 	local weights = {}
 	local connections = {}
 	local activations = {}
+	local bpt = {} -- table for backpropagation
 --	local connection = {from = 1, to = 4, nweight = 3, activation = 1}
+	local n_connection = 1
 	for from = 1, (input+middle) do -- from: from first to last middle
 		for to = math.max((input+1), (from+1)), (input+middle+output) do -- to: from first middle to last output
 			local weight = new_weight ()
-			table.insert(weights, weight)
+			table.insert(weights, weight) -- now #weights == n_connection
 			local n_activation = random_n_activation ()
-			table.insert (activations, n_activation)
-			local connection={from=from, to=to, nweight=#weights, activation=#activations}
+			table.insert (activations, n_activation) -- now #activations == n_connection
+			local connection={from=from, to=to, n_connection=n_connection}
 			table.insert(connections, connection)
+			
+			bpt[to] = bpt[to] or {}
+			table.insert (bpt[to], from)
+			
+			n_connection=n_connection+1
 		end
 	end
 	nn.weights=weights
 	nn.activations=activations
 	nn.connections=connections
+--	table.sort(bpt)
+	nn.bpt=bpt
 	return nn
 end
 
@@ -135,25 +144,28 @@ function update_nn (nn, input)
 		nodes[i] = input[i]
 	end
 	for i, connection in ipairs (nn.connections) do
-		local weight = nn.weights[connection.nweight]
+		local n_connection = connection.n_connection
+		local weight = nn.weights[n_connection]
 		local from = connection.from
 --		print ('activations '..serpent.serialize(nn.activations, {indent = '	', sortkeys = false, comment = false}))
 --		print ('connection.activation' .. connection.activation)
-		local n_activation = nn.activations[connection.activation]
+		local n_activation = nn.activations[n_connection]
 --		print ('n_activation'..n_activation)
 		local func = do_activation[n_activation]
 		local value = func(nodes[from])
 		value = weight*value
 		local to = connection.to
 		if to < (nn.n_inputs+nn.n_middles+1) then -- write to middle node
-			
 			nodes[to] = nodes[to] and nodes[to] + value or value
 		else -- write to output node
-			print('i'..i..' to'..to)
+--			save to nodes
+			nodes[to] = nodes[to] and nodes[to] + value or value
+--			save to output
 			to = to - (nn.n_inputs+nn.n_middles)
 			output[to] = output[to] and (output[to] + value) or value
 		end
 	end
+	nn.nodes=nodes
 	return output
 end
 
@@ -174,21 +186,25 @@ end
 
 function backpropagation (nn, output, target)
 	local errors = {}
-	local Etotal = 0
+	local Etotal = get_total_error (output, target)
 	for i, v in pairs (output) do
 		local err = 0.5*(output[i]-target[i])^2
 		errors[i] = err
-		Etotal = Etotal + err
 	end
+	nn.Etotal=Etotal
 end
 
 
 ------ test
 local example = {{0, 1},{1, 0}} -- example with two inputs and one output values
 local nn = create_nn (#example[1], 2, #example[2]) -- 
-print (serpent.serialize(nn, {indent = '	', sortkeys = false, comment = false}))
 
 local output = update_nn (nn, example[1])
+
+backpropagation (nn, output, example[2])
+
+print (serpent.serialize(nn, {indent = '	', sortkeys = false, comment = false}))
+
 
 --print ('weights '.. #nn.weights)
 
