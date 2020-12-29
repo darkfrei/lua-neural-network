@@ -85,15 +85,15 @@ do_activation[#do_activation+1] = function (value, derivative)
 	end
 end
 
-do_activation[#do_activation+1] = function (value, derivative)
-	-- 7. gauss
-	local f = math.exp(-value^2)
-	if not derivative then
-		return f
-	else
-		return (-2*value*f)
-	end
-end
+--do_activation[#do_activation+1] = function (value, derivative)
+--	-- 7. gauss
+--	local f = math.exp(-value^2)
+--	if not derivative then
+--		return f
+--	else
+--		return (-2*value*f)
+--	end
+--end
 
 -------------- functions
 
@@ -210,8 +210,8 @@ end
 
 
 
-function backpropagation (nn, output, target)
-	local lr = 0.1
+function backpropagation (nn, output, target) -- I don't like how it works
+	local lr = 0.05 -- too much
 	local dcs = {}
 	for j = 1, #output do
 		local i = nn.n_inputs+nn.n_middles+j
@@ -234,7 +234,10 @@ function backpropagation (nn, output, target)
 		local dweight = dcs[to]*value_from
 --		nn.weights[n_connection]=weight-lr*dweight
 		nn.weights[n_connection]=weight+lr*dweight
+		print(n_activation..'	[from]'..from..'	dweight:'..dweight)
 	end
+--	print (serpent.serialize(dcs, {indent = '	', sortkeys = false, comment = false}))
+	
 end
 
 
