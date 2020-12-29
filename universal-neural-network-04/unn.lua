@@ -1,4 +1,4 @@
---	totally new universal neural network; version 04; 2020-12-27
+--	totally new universal neural network; version 04; 2020-12-29
 
 --	license: MIT https://opensource.org/licenses/MIT
 
@@ -21,6 +21,7 @@
 
 serpent = require('serpent')
 
+math.randomseed( os.time() )
 
 
 do_activation = {}
@@ -106,6 +107,7 @@ end
 
 
 function create_nn (input, middle, output)
+	-- no biases! just use one input more, set it as 1 or what you want
 	local nn = {n_inputs = input, n_middles = middle, n_outputs = output}
 	local weights = {}
 	local connections = {}
@@ -170,7 +172,29 @@ function update_nn (nn, input)
 end
 
 function mutate_nn (nn)
-	local new_nn = {}
+	local new_nn = nn
+	local weights = {}
+	local activations = {}
+	for i, weight in pairs (nn.weights) do
+		local case = math.random (6)
+		if case == 1 then
+			weights[i] = weight*(math.random()+math.random())
+		elseif case == 2 then
+			weights[i] = -weight*(math.random()+math.random())
+		else
+			weights[i] = weight
+		end
+	end
+	for i, n_activation in pairs (nn.activations) do
+		local case = math.random (4)
+		if case == 1 then -- mutation
+			activations[i] = random_n_activation ()
+		else -- same
+			activations[i] = n_activation
+		end
+	end
+	new_nn.weights = weights
+	new_nn.activations = activations
 	
 	return new_nn
 end
@@ -184,26 +208,56 @@ function get_total_error (output, target)
 	return Etotal
 end
 
+
+
 function backpropagation (nn, output, target)
-	local errors = {}
-	local Etotal = get_total_error (output, target)
-	for i, v in pairs (output) do
-		local err = 0.5*(output[i]-target[i])^2
-		errors[i] = err
+	local lr = 0.1
+	local dcs = {}
+	for j = 1, #output do
+		local i = nn.n_inputs+nn.n_middles+j
+		dcs[i] = (target[j]-output[j]) -- derivative of cost function; not sure + or -
 	end
-	nn.Etotal=Etotal
+	for n_connection = #nn.connections, 1, -1 do
+		local connection = nn.connections[n_connection]
+		local from = connection.from
+		local to = connection.to
+		local value_from = nn.nodes[from]
+		local value_to = nn.nodes[to]
+		local n_activation = nn.activations[n_connection]
+		local f_derivative = do_activation[n_activation] -- don't forget true as second argument
+		local weight = nn.weights[n_connection]
+		local derivative = f_derivative(value_from, true) -- not forgotten!
+		local value = weight*derivative
+		dcs[from] = dcs[from] and (dcs[from]+value) or value
+--		print ('from:'..from..' to:'..to)
+--		print (dcs[to])
+		local dweight = dcs[to]*value_from
+--		nn.weights[n_connection]=weight-lr*dweight
+		nn.weights[n_connection]=weight+lr*dweight
+	end
 end
 
 
 ------ test
 local example = {{0, 1},{1, 0}} -- example with two inputs and one output values
-local nn = create_nn (#example[1], 2, #example[2]) -- 
+local target = example[2]
+local nn = create_nn (#example[1], 2, #target)
+--print (serpent.serialize(nn, {indent = '	', sortkeys = false, comment = false}))
 
-local output = update_nn (nn, example[1])
 
-backpropagation (nn, output, example[2])
+--local output = update_nn (nn, example[1])
+--print ('output '..serpent.serialize(output, {indent = '	', sortkeys = false, comment = false}))
 
-print (serpent.serialize(nn, {indent = '	', sortkeys = false, comment = false}))
+for i = 1, 100 do
+	local output = update_nn (nn, example[1])
+	print ('total error: ' .. get_total_error (output, target))
+	backpropagation (nn, output, target)
+end
+
+--output = update_nn (nn, example[1])
+--print ('output '..serpent.serialize(output, {indent = '	', sortkeys = false, comment = false}))
+
+
 
 
 --print ('weights '.. #nn.weights)
@@ -213,4 +267,3 @@ print (serpent.serialize(nn, {indent = '	', sortkeys = false, comment = false}))
 --print (serpent.block(nn), {comment =false, sortkeys=false})
 --print (serpent.line(nn), {comment =false, sortkeys=false})
 --print (serpent.dump(nn), {comment =false, sortkeys=false})
-print ('output '..serpent.serialize(output, {indent = '	', sortkeys = false, comment = false}))
